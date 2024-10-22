@@ -14,6 +14,7 @@ function App() {
   const [locationDetails, setLocationDetails] = useState({}); // To store city and other details
   const [origin, setOrigin] = useState({}); // To store city and other details
   const [destination, setDestination] = useState({}); // To store city and other details
+  
 
 
   const handlePickItems = () => {
@@ -50,49 +51,74 @@ function App() {
 
   const fetchAvailability = async () => {
     try {
-      const response = await axios.post('https://api.xandar.instaleap.io/jobs/availability/v2', {
-        currency_code: 'COL',
-        start: '2024-10-21T00:00:00.701Z',
-        end: '2024-10-26T23:59:59.701Z',
-        slot_size: 60,
-        minimum_slot_size: 15,
-        operational_models_priority: ['FULL_SERVICE'],
-        fallback: true,
-        store_reference: '101_FS',
-        origin: origin,
-        destination: destination,
-        job_items: [
-          {
-            id: 'Test01',
-            name: 'Test',
-            photo_url: 'https://www.test.com',
-            unit: 'Test',
-            sub_unit: 'test',
-            quantity: 8,
-            sub_quantity: 2,
-            quantity_found_limits: { max: 5, min: 2 },
-            weight: 15,
-            volume: 60,
-            price: 1000000,
-            comment: 'This is a cheap test without a store',
-            attributes: {
-              category: 'Premimum',
-              plu: 'string',
-              ean: 'string',
-              location: destination,
-              picking_index: 'string',
-            },
-          },
-        ],
-      }, {
+      const response = {
+        method: 'POST',
+        url: 'https://api.xandar.instaleap.io/jobs/availability/v2',
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          'x-api-key': '',
+          'x-api-key': 'yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi'
         },
-      });
+        data: {
+          currency_code: 'COP',
+          start: '2024-10-21T00:00:00.701Z',
+          end: '2024-10-22T23:59:59.701Z',
+          slot_size: 60,
+          minimum_slot_size: 0,
+          operational_models_priority: ['FULL_SERVICE'],
+          fallback: true,
+          store_reference: '101_FS',
+          origin: {
+            name: 'string',
+            address: 'string',
+            address_two: 'string',
+            description: 'string',
+            country: 'string',
+            city: 'string',
+            state: 'string',
+            zip_code: 'string',
+            latitude: origin.latitude,
+            longitude: origin.longitude
+          },
+          destination: {
+            name: 'string',
+            address: 'string',
+            address_two: 'string',
+            description: 'string',
+            country: 'string',
+            city: 'string',
+            state: 'string',
+            zip_code: 'string',
+            latitude: destination.latitude,
+            longitude: destination.longitude
+          },
+          job_items: [
+            {
+              id: 'string',
+              name: 'string',
+              photo_url: 'string',
+              unit: 'string',
+              sub_unit: 'string',
+              quantity: 0,
+              sub_quantity: 0,
+              quantity_found_limits: {max: 0, min: 0},
+              weight: 0,
+              volume: 0,
+              price: 0,
+              comment: 'string',
+              attributes: {
+                category: 'string',
+                plu: 'string',
+                ean: 'string',
+                location: 'string',
+                picking_index: 'string'
+              }
+            }
+          ]
+        }
+      };      
   
-      console.log(response.data); // or update state if necessary
+      console.log(response.data)
     } catch (error) {
       console.error('Error fetching availability:', error.message);
     }
@@ -135,7 +161,7 @@ function App() {
   const fetchLocationDetails = async (lat, lng) => {
     try {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyCgmf6MnqMcNX3y6mlKE3EEb8tdgwFM7KY`
       );
       const addressComponents = response.data.results[0].address_components;
       const formattedAddress = response.data.results[0].formatted_address;
@@ -172,7 +198,7 @@ function App() {
       <button onClick={handleCheckout}>Checkout</button>
 
       {/* Google Maps */}
-      <LoadScript googleMapsApiKey="">
+      <LoadScript googleMapsApiKey="AIzaSyCgmf6MnqMcNX3y6mlKE3EEb8tdgwFM7KY">
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={mapCenter}
@@ -216,11 +242,11 @@ function App() {
           <Calendar
             onChange={setSelectedDate}
             value={selectedDate}
-            tileDisabled={({ date }) =>
+            /*tileDisabled={({ date }) =>
               !availability.some(
                 (item) => new Date(item.date).toDateString() === date.toDateString()
               )
-            }
+            }*/
           />
         </div>
       </div>
