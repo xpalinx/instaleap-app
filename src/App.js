@@ -3,6 +3,7 @@ import Calendar from 'react-calendar';
 import 'react-calendar/dist/Calendar.css';
 import axios from 'axios';
 import { GoogleMap, LoadScript, Marker } from '@react-google-maps/api';
+import credentials from './config/credentials';
 
 function App() {
   const [availability, setAvailability] = useState([]);
@@ -57,7 +58,7 @@ function App() {
         headers: {
           accept: 'application/json',
           'content-type': 'application/json',
-          'x-api-key': 'yoJYongi4V4m0S4LClubdyiu5nq6VIpxazcFaghi'
+          'x-api-key': credentials.apiKey
         },
         data: {
           currency_code: 'COP',
@@ -161,7 +162,7 @@ function App() {
   const fetchLocationDetails = async (lat, lng) => {
     try {
       const response = await axios.get(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=AIzaSyCgmf6MnqMcNX3y6mlKE3EEb8tdgwFM7KY`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=`+credentials.mapskey
       );
       const addressComponents = response.data.results[0].address_components;
       const formattedAddress = response.data.results[0].formatted_address;
@@ -198,7 +199,7 @@ function App() {
       <button onClick={handleCheckout}>Checkout</button>
 
       {/* Google Maps */}
-      <LoadScript googleMapsApiKey="AIzaSyCgmf6MnqMcNX3y6mlKE3EEb8tdgwFM7KY">
+      <LoadScript googleMapsApiKey={credentials.mapskey}>
         <GoogleMap
           mapContainerStyle={mapContainerStyle}
           center={mapCenter}
