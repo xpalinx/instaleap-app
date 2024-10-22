@@ -15,7 +15,7 @@ function App() {
   const [locationDetails, setLocationDetails] = useState({}); // To store city and other details
   const [origin, setOrigin] = useState({}); // To store city and other details
   const [destination, setDestination] = useState({}); // To store city and other details
-  
+  const [response, setResponse] = useState({}); // To store city and other details
 
 
   const handlePickItems = () => {
@@ -50,79 +50,98 @@ function App() {
     });
   }
 
+  const mockResponse = () => {
+    setResponse({
+      id: "Mock",
+      from: "2024-10-22T16:00:00.701Z",
+      to: "2024-10-22T17:00:00.701Z",
+      store: {
+        id: "101",
+        name: "FS"
+      },
+      description: "Mock",
+      operational_model: "FULL_SERVICE",
+      expires_at: "2024-10-22T24:00:00.701Z"
+    });
+  }
+
   const fetchAvailability = async () => {
-    try {
-      const response = {
-        method: 'POST',
-        url: 'https://api.xandar.instaleap.io/jobs/availability/v2',
-        headers: {
-          accept: 'application/json',
-          'content-type': 'application/json',
-          'x-api-key': credentials.apiKey
-        },
-        data: {
-          currency_code: 'COP',
-          start: '2024-10-21T00:00:00.701Z',
-          end: '2024-10-22T23:59:59.701Z',
-          slot_size: 60,
-          minimum_slot_size: 0,
-          operational_models_priority: ['FULL_SERVICE'],
-          fallback: true,
-          store_reference: '101_FS',
-          origin: {
-            name: 'string',
-            address: 'string',
-            address_two: 'string',
-            description: 'string',
-            country: 'string',
-            city: 'string',
-            state: 'string',
-            zip_code: 'string',
-            latitude: origin.latitude,
-            longitude: origin.longitude
+    const options = {
+      method: 'POST',
+      url: 'https://api.xandar.instaleap.io/jobs/availability/v2',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        'x-api-key': credentials.apiKey
+      },
+      body: {
+      "currency_code": "COP",
+      "start": "2024-10-22T00:00:00.701Z",
+      "end": "2024-10-26T23:59:59.701Z",
+      "slot_size": 60,
+      "minimum_slot_size": 15,
+      "operational_models_priority": ["FULL_SERVICE"],
+      "fallback": true,
+      "store_reference": "101_FS",
+      "origin": {
+        "name": "string",
+        "address": "string",
+        "address_two": "string",
+        "description": "string",
+        "country": "string",
+        "city": "string",
+        "state": "string",
+        "zip_code": "string",
+        "latitude": 4.687640380464154,
+        "longitude": -74.07428741455078
+      },
+      "destination": {
+        "name": "string",
+        "address": "string",
+        "address_two": "string",
+        "description": "string",
+        "country": "string",
+        "city": "string",
+        "state": "string",
+        "zip_code": "string",
+        "latitude": 4.687640380464154,
+        "longitude": -74.07428741455078
+      },
+      "job_items": [
+        {
+          "id": "string",
+          "name": "string",
+          "unit": "string",
+          "sub_unit": "string",
+          "quantity": 0,
+          "sub_quantity": 0,
+          "quantity_found_limits": {
+            "max": 5,
+            "min": 2
           },
-          destination: {
-            name: 'string',
-            address: 'string',
-            address_two: 'string',
-            description: 'string',
-            country: 'string',
-            city: 'string',
-            state: 'string',
-            zip_code: 'string',
-            latitude: destination.latitude,
-            longitude: destination.longitude
-          },
-          job_items: [
-            {
-              id: 'string',
-              name: 'string',
-              photo_url: 'string',
-              unit: 'string',
-              sub_unit: 'string',
-              quantity: 0,
-              sub_quantity: 0,
-              quantity_found_limits: {max: 0, min: 0},
-              weight: 0,
-              volume: 0,
-              price: 0,
-              comment: 'string',
-              attributes: {
-                category: 'string',
-                plu: 'string',
-                ean: 'string',
-                location: 'string',
-                picking_index: 'string'
-              }
-            }
-          ]
+          "weight": 1,
+          "volume": 1,
+          "price": 1,
+          "comment": "string",
+          "attributes": {
+            "category": "string",
+            "plu": "string",
+            "ean": "string",
+            "location": "string",
+            "picking_index": "string"
+          }
         }
-      };      
-  
-      console.log(response.data)
-    } catch (error) {
-      console.error('Error fetching availability:', error.message);
-    }
+      ]
+      }
+    };
+    axios
+      .request(options)
+      .then(function (response) {
+        console.log(JSON.stringify(response.data));
+      })
+      .catch(function (error) {
+        console.error(error);
+      });
   };
   
 
@@ -243,11 +262,6 @@ function App() {
           <Calendar
             onChange={setSelectedDate}
             value={selectedDate}
-            /*tileDisabled={({ date }) =>
-              !availability.some(
-                (item) => new Date(item.date).toDateString() === date.toDateString()
-              )
-            }*/
           />
         </div>
       </div>
@@ -268,8 +282,7 @@ function App() {
                     backgroundColor: selectedTime === time ? 'lightblue' : 'white',
                     border: '1px solid gray',
                     borderRadius: '5px',
-                  }}
-                >
+                  }}>
                   {time}
                 </button>
               ))
@@ -288,6 +301,16 @@ function App() {
         <button onClick={fetchAvailability} style={{ marginRight: '10px' }}>
           fetch times
         </button>
+
+        {response && (
+        <div style={{ marginTop: '20px' }}>
+          {response && (
+            <div style={{ marginTop: '20px' }}>
+              <h4>mocked response {JSON.stringify(response)}</h4>
+            </div>
+          )}
+        </div>
+        )}
       </div>
 
     </div>
