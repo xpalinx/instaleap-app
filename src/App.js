@@ -10,12 +10,12 @@ function App() {
   const [selectedDate, setSelectedDate] = useState(null);
   const [timeSlots, setTimeSlots] = useState([]);
   const [selectedTime, setSelectedTime] = useState('');
-  const [mapCenter, setMapCenter] = useState({ lat: 4.710989, lng: -74.072090 }); // Default location (Bogotá)
-  const [selectedPosition, setSelectedPosition] = useState(null); // To store selected lat/lng
-  const [locationDetails, setLocationDetails] = useState({}); // To store city and other details
-  const [origin, setOrigin] = useState({}); // To store city and other details
-  const [destination, setDestination] = useState({}); // To store city and other details
-  const [response, setResponse] = useState({}); // To store city and other details
+  const [mapCenter, setMapCenter] = useState({ lat: 4.710989, lng: -74.072090 });
+  const [selectedPosition, setSelectedPosition] = useState(null);
+  const [locationDetails, setLocationDetails] = useState({}); 
+  const [origin, setOrigin] = useState({});  
+  const [destination, setDestination] = useState({});  
+  const [response, setResponse] = useState({});  
 
 
   const handlePickItems = () => {
@@ -50,22 +50,8 @@ function App() {
     });
   }
 
-  const mockResponse = () => {
-    setResponse({
-      id: "Mock",
-      from: "2024-10-22T16:00:00.701Z",
-      to: "2024-10-22T17:00:00.701Z",
-      store: {
-        id: "101",
-        name: "FS"
-      },
-      description: "Mock",
-      operational_model: "FULL_SERVICE",
-      expires_at: "2024-10-22T24:00:00.701Z"
-    });
-  }
-
   const fetchAvailability = async () => {
+    console.log("fetching")
     const options = {
       method: 'POST',
       url: 'https://api.xandar.instaleap.io/jobs/availability/v2',
@@ -74,38 +60,38 @@ function App() {
         'content-type': 'application/json',
         'x-api-key': credentials.apiKey
       },
-      body: {
+      data: {
       "currency_code": "COP",
-      "start": "2024-10-22T00:00:00.701Z",
-      "end": "2024-10-26T23:59:59.701Z",
+      "start": "2024-10-25T00:00:00.701Z",
+      "end": "2024-10-25T23:59:59.701Z",
       "slot_size": 60,
       "minimum_slot_size": 15,
       "operational_models_priority": ["FULL_SERVICE"],
       "fallback": true,
       "store_reference": "101_FS",
       "origin": {
-        "name": "string",
-        "address": "string",
-        "address_two": "string",
-        "description": "string",
-        "country": "string",
-        "city": "string",
-        "state": "string",
-        "zip_code": "string",
-        "latitude": 4.687640380464154,
-        "longitude": -74.07428741455078
+        "name": "origin.name",
+        "address": "origin.address",
+        "address_two": "origin.address",
+        "description": "Test",
+        "country": "origin.country",
+        "city": "origin.city",
+        "state": "origin.state",
+        "zip_code": "origin.zip_code",
+        "latitude": origin.latitude,
+        "longitude": origin.longitude
       },
       "destination": {
-        "name": "string",
-        "address": "string",
-        "address_two": "string",
-        "description": "string",
-        "country": "string",
-        "city": "string",
-        "state": "string",
-        "zip_code": "string",
-        "latitude": 4.687640380464154,
-        "longitude": -74.07428741455078
+        "name": "destination.name",
+        "address": "destination.address",
+        "address_two": "destination.address",
+        "description": "testDest",
+        "country": "destination.country",
+        "city": "destination.city",
+        "state": "destination.state",
+        "zip_code": "destination.zip_code",
+        "latitude": destination.latitude,
+        "longitude": destination.longitude
       },
       "job_items": [
         {
@@ -113,11 +99,11 @@ function App() {
           "name": "string",
           "unit": "string",
           "sub_unit": "string",
-          "quantity": 0,
-          "sub_quantity": 0,
+          "quantity": 1,
+          "sub_quantity": 1,
           "quantity_found_limits": {
-            "max": 5,
-            "min": 2
+            "max": 1,
+            "min": 1
           },
           "weight": 1,
           "volume": 1,
@@ -138,32 +124,13 @@ function App() {
       .request(options)
       .then(function (response) {
         console.log(JSON.stringify(response.data));
+        setResponse(JSON.stringify(response.data));
       })
       .catch(function (error) {
         console.error(error);
+        setResponse(JSON.stringify(error));
       });
   };
-  
-
-  const fetchAvailableTimes = (selectedDate) => {
-    const selectedDayAvailability = availability.find((item) =>
-      new Date(item.date).toDateString() === new Date(selectedDate).toDateString()
-    );
-
-    if (selectedDayAvailability) {
-      setTimeSlots(selectedDayAvailability.times || []);
-    }
-  };
-
-  useEffect(() => {
-    fetchAvailability();
-  }, []);
-
-  useEffect(() => {
-    if (selectedDate) {
-      fetchAvailableTimes(selectedDate);
-    }
-  }, [selectedDate]);
 
   // Map settings
   const mapContainerStyle = {
@@ -217,6 +184,20 @@ function App() {
       </button>
       <button onClick={handleCheckout}>Checkout</button>
 
+      {/* Display selected location details */}
+      {selectedPosition && (
+        <div style={{ marginTop: '20px' }}>
+          <h2>Selected position:</h2>
+          <p>Address: {locationDetails.address}</p>
+          <p>Latitude: {locationDetails.latitude}</p>
+          <p>Longitude: {locationDetails.longitude}</p>
+          <p>City: {locationDetails.city}</p>
+          <p>State: {locationDetails.state}</p>
+          <p>Country: {locationDetails.country}</p>
+          <p>ZIP Code: {locationDetails.zip_code}</p>
+        </div>
+      )}
+
       {/* Google Maps */}
       <LoadScript googleMapsApiKey={credentials.mapskey}>
         <GoogleMap
@@ -231,19 +212,7 @@ function App() {
         </GoogleMap>
       </LoadScript>
 
-      {/* Display selected location details */}
-      {selectedPosition && (
-        <div style={{ marginTop: '20px' }}>
-          <h2>Selected position:</h2>
-          <p>Address: {locationDetails.address}</p>
-          <p>Latitude: {locationDetails.latitude}</p>
-          <p>Longitude: {locationDetails.longitude}</p>
-          <p>City: {locationDetails.city}</p>
-          <p>State: {locationDetails.state}</p>
-          <p>Country: {locationDetails.country}</p>
-          <p>ZIP Code: {locationDetails.zip_code}</p>
-        </div>
-      )}
+    
       <div>
         <button onClick={createOrigin} style={{ marginRight: '10px' }}>
           Set origin
@@ -253,60 +222,29 @@ function App() {
           Set Destination
         </button>
       </div>
+
       <div>
-        
-      {/* Calendar for selecting a delivery date */}
-      <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
-        <div style={{ width: 'fit-content' }}>
-          <h3>Select a delivery date:</h3>
-          <Calendar
-            onChange={setSelectedDate}
-            value={selectedDate}
-          />
-        </div>
-      </div>
-
-      {/* Display time slots once a date is selected */}
-      {selectedDate && (
-        <div style={{ marginTop: '20px' }}>
-          <h3>Select a time for {new Date(selectedDate).toLocaleDateString()}:</h3>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            {timeSlots.length > 0 ? (
-              timeSlots.map((time, index) => (
-                <button
-                  key={index}
-                  onClick={() => setSelectedTime(time)}
-                  style={{
-                    margin: '5px',
-                    padding: '10px',
-                    backgroundColor: selectedTime === time ? 'lightblue' : 'white',
-                    border: '1px solid gray',
-                    borderRadius: '5px',
-                  }}>
-                  {time}
-                </button>
-              ))
-            ) : (
-              <p>No available times for this date</p>
-            )}
+        {/* Calendar for selecting a delivery date */}
+        <div style={{ marginTop: '20px', display: 'flex', justifyContent: 'center' }}>
+          <div style={{ width: 'fit-content' }}>
+            <h3>Select a delivery date:</h3>
+            <Calendar
+              onChange={setSelectedDate}
+              value={selectedDate}
+            />
           </div>
-
-          {selectedTime && (
-            <div style={{ marginTop: '20px' }}>
-              <h4>You selected {selectedTime}</h4>
-            </div>
-          )}
         </div>
-        )}
-        <button onClick={fetchAvailability} style={{ marginRight: '10px' }}>
-          fetch times
-        </button>
+        <div>
+          <button onClick={fetchAvailability} style={{ marginRight: '10px' }}>
+            Fetch Availability
+          </button>
+        </div>
 
         {response && (
         <div style={{ marginTop: '20px' }}>
           {response && (
             <div style={{ marginTop: '20px' }}>
-              <h4>mocked response {JSON.stringify(response)}</h4>
+              <h4>Response {JSON.stringify(response)}</h4>
             </div>
           )}
         </div>
