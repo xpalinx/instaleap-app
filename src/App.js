@@ -14,38 +14,11 @@ function App() {
   const [response, setResponse] = useState({});
   const [selectedItem, setSelectedItem] = useState({});
   const [facturacion, setFacturacion] = useState('');
-
-  const handlePickItems = () => {
-    alert('Pick Items button clicked');
-  };
-
-  const handleCheckout = () => {
-    alert('Checkout button clicked');
-  };
-
-  const createDestination = () => {
-    setDestination({
-      address: locationDetails.address,
-      latitude: locationDetails.latitude,
-      longitude: locationDetails.longitude,
-      city: locationDetails.city,
-      state: locationDetails.state,
-      country: locationDetails.country,
-      zip_code: locationDetails.zip_code,
-    });
-  };
-
-  function formatInitSelectedDate(date) {
-    const startDate = new Date(date);
-    startDate.setHours(0, 0, 0, 0);
-    return startDate.toISOString();
-  }
-
-  function formatEndSelectedDate(date) {
-    const endDate = new Date(date);
-    endDate.setHours(23, 59, 59, 999);
-    return endDate.toISOString();
-  }
+  const [job, setJob] = useState({});
+  const [jobConsult, setJobConsult] = useState({});
+  const [job_id, set_job_id] = useState({});
+  
+  
 
   const fetchAvailability = async () => {
     const options = {
@@ -115,6 +88,147 @@ function App() {
       });
   };
 
+  const createJob = async () => {
+    const options = {
+      method: 'POST',
+      url: 'https://api.xandar.instaleap.io/jobs',
+      headers: {
+        accept: 'application/json',
+        'content-type': 'application/json',
+        'x-api-key': credentials.apiKey
+      },
+      data: {
+        "slot_id": selectedItem.id,
+        "client_reference": "332122",
+        "recipient": {
+          "name": "Pablo Veintemilla",
+          "email": "palin.veintemilla@gmail.com",
+          "phone_number": "3132024990",
+          "wants_to_receive_notifications": true,
+          "identification": {
+            "number": "1018503069",
+            "type": "cc"
+          }
+        },
+        "payment_info": {
+          "currency_code": "COP",
+          "prices": {
+            "order_value": 100000,
+            "shipping_fee": 1,
+            "taxes": 0,
+            "discounts": 0,
+            "subtotal": 0,
+            "attributes": [
+              {
+                "type": "ORDER_VALUE",
+                "name": "payment",
+                "value": 45000
+              },
+              {
+                "type": "ORDER_VALUE",
+                "name": "other",
+                "value": 450
+              }
+            ],
+            "additional_info": [
+            {
+              "type": "adjustment",
+              "name": "Reembolso",
+              "value": "-5000"
+            },
+            {
+              "type": "original_order_value",
+              "name": "Valor Original",
+              "value": "45000"
+            }
+          ]
+          },
+          "payment": {
+            "id": "string",
+            "payment_status": "SUCCEEDED",
+            "payment_status_details": "string",
+            "method_details": "string",
+            "blocking_policy": "UNBLOCKED",
+            "method": "CASH",
+            "reference": "string",
+            "value": 0,
+            "metadata": {
+              "transaction": [
+                {
+                  "type": "CHARGE",
+                  "status": "COMPLETED",
+                  "amount_currency_code": "COP",
+                  "amount_value": 18.9,
+                  "created_at": new Date()
+                }
+              ]
+            }
+          }
+        }
+      }
+    };
+    axios
+      .request(options)
+      .then(function (response) {
+        console.log(response.data);
+        setJob(response.data);
+      })
+      .catch(function (error) {
+        console.error(error);
+        setJob(error);
+      });
+  };
+
+  const getJobInfo = async () => {
+    console.log(job)
+    const options = {
+      method: 'GET',
+      url: 'https://api.xandar.instaleap.io/jobs/'+job_id,
+      headers: {
+        accept: 'application/json',
+        'x-api-key': credentials.apiKey
+      }
+    };
+    axios
+      .request(options)
+      .then(function (response) {
+        console.log(response.data);
+        setJobConsult(response.data);
+      })
+      .catch(function (error) {
+        console.error(error);
+        setJobConsult(error);
+      });
+  };
+
+  const handlePickItems = () => {
+    alert('Pick Items button clicked');
+  };
+
+  const createDestination = () => {
+    setDestination({
+      address: locationDetails.address,
+      latitude: locationDetails.latitude,
+      longitude: locationDetails.longitude,
+      city: locationDetails.city,
+      state: locationDetails.state,
+      country: locationDetails.country,
+      zip_code: locationDetails.zip_code,
+    });
+  };
+
+  function formatInitSelectedDate(date) {
+    const startDate = new Date(date);
+    startDate.setHours(0, 0, 0, 0);
+    return startDate.toISOString();
+  }
+
+  function formatEndSelectedDate(date) {
+    const endDate = new Date(date);
+    endDate.setHours(23, 59, 59, 999);
+    return endDate.toISOString();
+  }
+
   const mapContainerStyle = {
     width: '30%', // Set width to 100% for responsiveness
     height: '300px', // Set a fixed height for the map
@@ -168,13 +282,16 @@ function App() {
     setFacturacion(e.target.value);
   };
 
+  const handleJobIdChange = (e) => {
+    set_job_id(e.target.value);
+  };
+
   return (
     <div style={{ textAlign: 'center', marginTop: '50px' }}>
       <h1>Instaleap App</h1>
       <button onClick={handlePickItems} style={{ marginRight: '10px' }}>
         Pick Items
       </button>
-      <button onClick={handleCheckout}>Checkout</button>
 
       <div style={{ display: 'flex', justifyContent: 'center', marginTop: '20px' }}>
         <LoadScript googleMapsApiKey={credentials.mapskey}>
@@ -216,9 +333,6 @@ function App() {
               <tr>
                 <th style={{ border: '1px solid black', padding: '8px' }}>From</th>
                 <th style={{ border: '1px solid black', padding: '8px' }}>To</th>
-                <th style={{ border: '1px solid black', padding: '8px' }}>Store Name</th>
-                <th style={{ border: '1px solid black', padding: '8px' }}>Description</th>
-                <th style={{ border: '1px solid black', padding: '8px' }}>Expires At</th>
               </tr>
             </thead>
             <tbody>
@@ -226,9 +340,6 @@ function App() {
                 <tr key={index} onClick={() => handleItemClick(item)} style={{ cursor: 'pointer', border: '1px solid black' }}>
                   <td style={{ border: '1px solid black', padding: '8px' }}>{new Date(item.from).toLocaleString()}</td>
                   <td style={{ border: '1px solid black', padding: '8px' }}>{new Date(item.to).toLocaleString()}</td>
-                  <td style={{ border: '1px solid black', padding: '8px' }}>{item.store.name}</td>
-                  <td style={{ border: '1px solid black', padding: '8px' }}>{item.description}</td>
-                  <td style={{ border: '1px solid black', padding: '8px' }}>{new Date(item.expires_at).toLocaleString()}</td>
                 </tr>
               ))}
             </tbody>
@@ -241,21 +352,33 @@ function App() {
             <h4>Selected Item Details:</h4>
             <p><strong>From:</strong> {new Date(selectedItem.from).toLocaleString()}</p>
             <p><strong>To:</strong> {new Date(selectedItem.to).toLocaleString()}</p>
-            <p><strong>Expires At:</strong> {new Date(selectedItem.expires_at).toLocaleString()}</p>
           </div>
         )}
 
-    <div>
-      <input
-        type="text"
-        placeholder="Facturación"
-        value={facturacion}
-        onChange={handleInputChange}
-      />
-      <button disabled={!facturacion}>Submit</button>
-    </div>
+      <div>
+        <input
+          type="text"
+          placeholder="Facturación"
+          value={facturacion}
+          onChange={handleInputChange}
+        />
+        <button disabled={!facturacion} onClick={createJob}>Confirmar</button>
+      </div>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Job_id"
+          value={job_id}
+          onChange={handleJobIdChange}
+        />
+        <button disabled={!job_id} onClick={getJobInfo}>Consultar</button>
+        <pre>{JSON.stringify(jobConsult, null, 2)}</pre>
+      </div>
+
     </div>
   );
+
 }
 
 export default App;
